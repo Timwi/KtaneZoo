@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using <ModuleID>;
+using Zoo;
 using UnityEngine;
+
 using Rnd = UnityEngine.Random;
 
 /// <summary>
-/// On the Subject of Zoo
+/// On the Subject of Zoos
 /// Created by Timwi
 /// </summary>
 public class ZooModule : MonoBehaviour

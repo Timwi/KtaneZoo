@@ -14,7 +14,7 @@ GameObject:
   - 114: {fileID: 11496072}
   - 114: {fileID: 11489182}
   m_Layer: 0
-  m_Name: ModuleNameModule
+  m_Name: ZooModule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -246,21 +246,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 127088}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9ade4bfb1a202d43974e73b234f1b7d, type: 3}
+  m_Script: {fileID: 11500000, guid: 48534d206bd733d47b11bc89644a7c67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Bomb: {fileID: 11489324}
   Module: {fileID: 11429752}
   Audio: {fileID: 11496072}
-  Regions:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!114 &11489324
 MonoBehaviour:
   m_ObjectHideFlags: 1
