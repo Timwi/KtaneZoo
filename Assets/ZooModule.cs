@@ -18,11 +18,11 @@ public class ZooModule : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("[<Module Name>] Started");
+        Debug.Log("[Zoo] Started");
     }
 
     void ActivateModule()
     {
-        Debug.Log("[<Module Name>] Activated");
+        Debug.Log("[Zoo] Activated");
     }
 }
