@@ -16,13 +16,11 @@ public class ZooModule : MonoBehaviour
     public KMBombModule Module;
     public KMAudio Audio;
 
+    private static int _moduleIdCounter = 1;
+    private int _moduleId;
+
     void Start()
     {
-        Debug.Log("[Zoo] Started");
-    }
-
-    void ActivateModule()
-    {
-        Debug.Log("[Zoo] Activated");
+        _moduleId = _moduleIdCounter++;
     }
 }
