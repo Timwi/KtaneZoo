@@ -43,40 +43,6 @@ namespace Zoo
 
         #region Helpers
 
-        public enum KnownBatteryType
-        {
-            Unknown = 0,
-            D = 1,
-            //D batteries currently always come as 1 battery in the one battery holder
-            AA = 2,
-            //AA batteries currently always comes in 2 batteries in the one battery holder
-        }
-
-        public enum KnownPortType
-        {
-            DVI,
-            Parallel,
-            PS2,
-            RJ45,
-            Serial,
-            StereoRCA
-        }
-
-        public enum KnownIndicatorLabel
-        {
-            SND,
-            CLR,
-            CAR,
-            IND,
-            FRQ,
-            SIG,
-            NSA,
-            MSA,
-            TRN,
-            BOB,
-            FRK
-        }
-
         private static IEnumerable<T> GetJSONEntries<T>(KMBombInfo bombInfo, string queryKey, string queryInfo) where T : new()
         {
             return bombInfo.QueryWidgets(queryKey, queryInfo).Select(delegate (string queryEntry)
@@ -109,7 +75,7 @@ namespace Zoo
 
         #region Public Extensions
 
-        public static bool IsIndicatorPresent(this KMBombInfo bombInfo, KnownIndicatorLabel indicatorLabel)
+        public static bool IsIndicatorPresent(this KMBombInfo bombInfo, IndicatorLabel indicatorLabel)
         {
             return bombInfo.IsIndicatorPresent(indicatorLabel.ToString());
         }
@@ -119,7 +85,7 @@ namespace Zoo
             return GetIndicatorEntries(bombInfo).Any((x) => indicatorLabel.Equals(x.label));
         }
 
-        public static bool IsIndicatorOn(this KMBombInfo bombInfo, KnownIndicatorLabel indicatorLabel)
+        public static bool IsIndicatorOn(this KMBombInfo bombInfo, IndicatorLabel indicatorLabel)
         {
             return bombInfo.IsIndicatorOn(indicatorLabel.ToString());
         }
@@ -129,7 +95,7 @@ namespace Zoo
             return GetIndicatorEntries(bombInfo).Any((x) => x.IsOn() && indicatorLabel.Equals(x.label));
         }
 
-        public static bool IsIndicatorOff(this KMBombInfo bombInfo, KnownIndicatorLabel indicatorLabel)
+        public static bool IsIndicatorOff(this KMBombInfo bombInfo, IndicatorLabel indicatorLabel)
         {
             return bombInfo.IsIndicatorOff(indicatorLabel.ToString());
         }
@@ -159,7 +125,7 @@ namespace Zoo
             return GetBatteryEntries(bombInfo).Sum((x) => x.numbatteries);
         }
 
-        public static int GetBatteryCount(this KMBombInfo bombInfo, KnownBatteryType batteryType)
+        public static int GetBatteryCount(this KMBombInfo bombInfo, BatteryType batteryType)
         {
             return GetBatteryEntries(bombInfo).Where((x) => x.numbatteries == (int) batteryType).Sum((x) => x.numbatteries);
         }
@@ -174,7 +140,7 @@ namespace Zoo
             return GetPortEntries(bombInfo).Sum((x) => x.presentPorts.Length);
         }
 
-        public static int GetPortCount(this KMBombInfo bombInfo, KnownPortType portType)
+        public static int GetPortCount(this KMBombInfo bombInfo, PortType portType)
         {
             return bombInfo.GetPortCount(portType.ToString());
         }
@@ -199,7 +165,7 @@ namespace Zoo
             return GetPortEntries(bombInfo).Select((x) => x.presentPorts);
         }
 
-        public static bool IsPortPresent(this KMBombInfo bombInfo, KnownPortType portType)
+        public static bool IsPortPresent(this KMBombInfo bombInfo, PortType portType)
         {
             return bombInfo.IsPortPresent(portType.ToString());
         }
