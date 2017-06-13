@@ -232,6 +232,8 @@ public class ZooModule : MonoBehaviour
 
         foreach (var graphic in graphics)
             Destroy(graphic);
+        foreach (var pedestal in pedestals)
+            pedestal.gameObject.SetActive(false);
         _isDoorOpen = false;
     }
 }
