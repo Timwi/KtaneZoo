@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Zoo
 {
@@ -15,7 +16,7 @@ namespace Zoo
                         yield return hex;
                 }
         }
-        public static readonly double WidthToHeight = Math.Sqrt(3) / 2;
+        public static readonly float WidthToHeight = Mathf.Sqrt(3) / 2;
 
         public static double LargeWidth(int sideLength) { return (3 * sideLength - 1) * .5; }
         public static double LargeHeight(int sideLength) { return (2 * sideLength - 1) * WidthToHeight; }
@@ -69,6 +70,9 @@ namespace Zoo
             if (Q == -size)
                 yield return 5;
         }
+
+        public float GetCenterX(float hexWidth) { return Q * .75f * hexWidth; }
+        public float GetCenterY(float hexWidth) { return (Q * .5f + R) * hexWidth * WidthToHeight; }
 
         public override string ToString() { return string.Format("({0}, {1})", Q, R); }
 
