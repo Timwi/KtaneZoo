@@ -212,7 +212,7 @@ public class ZooModule : MonoBehaviour
         }
         Door.transform.localPosition = new Vector3(-.14f, .025f, 0);
 
-        for (int i = 0; i < 50 && !abort; i++)
+        for (int i = 0; i < 60 && !abort; i++)
             yield return new WaitForSeconds(.1f);
 
         // SLIDE CLOSED
