@@ -55,6 +55,8 @@ public class ZooModule : MonoBehaviour
         // Wait a little to ensure that edgework is available.
         yield return new WaitForSeconds(.1f);
 
+        _pedestals = MainSelectable.Children.Where(p => p != null && p.transform.parent == PedestalsParent.transform).ToArray();
+
         var counts = Ut.NewArray(Bomb.GetPortPlateCount() + 1, j => j == 0 ? portTypes.ToHashSet() : new HashSet<PortType>());
         foreach (var port in Bomb.GetPorts())
         {
@@ -94,7 +96,6 @@ public class ZooModule : MonoBehaviour
         Debug.LogFormat("[Zoo #{0}] Animals shown on front: {1}, {2}", _moduleId, Data.Qs[inf.Line[0].Q + 4].Name, Data.Rs[inf.Line[0].R + 4].Name);
         Debug.LogFormat("[Zoo #{0}] Line: {1} ({2})", _moduleId, inf.Line.Select(h => Data.Hexes[h].Name).JoinString(", "), inf.PortType == null ? "two-steps rule" : inf.PortType.ToString());
 
-        _pedestals = MainSelectable.Children.Where(p => p != null && p.transform.parent == PedestalsParent.transform).ToArray();
         _pedestalChildIndexes = new int[_pedestals.Length];
         for (int i = 0; i < _pedestals.Length; i++)
         {
@@ -207,10 +208,10 @@ public class ZooModule : MonoBehaviour
         Audio.PlaySoundAtTransform("SlidingSound", Door.transform);
         for (float t = 0; t < 1; t += Time.deltaTime * 1.5f)
         {
-            Door.transform.localPosition = new Vector3(easeInOutQuad(t, 0, -.14f, 1), .025f, 0);
+            Door.transform.localPosition = new Vector3(easeInOutQuad(t, 0, -.135f, 1), .025f, 0);
             yield return null;
         }
-        Door.transform.localPosition = new Vector3(-.14f, .025f, 0);
+        Door.transform.localPosition = new Vector3(-.135f, .025f, 0);
 
         for (int i = 0; i < 60 && !abort; i++)
             yield return new WaitForSeconds(.1f);
@@ -219,7 +220,7 @@ public class ZooModule : MonoBehaviour
         Audio.PlaySoundAtTransform("SlidingSound", Door.transform);
         for (float t = 0; t < 1; t += Time.deltaTime * 1.5f)
         {
-            Door.transform.localPosition = new Vector3(easeInOutQuad(t, -.14f, 0, 1), .025f, 0);
+            Door.transform.localPosition = new Vector3(easeInOutQuad(t, -.135f, 0, 1), .025f, 0);
             yield return null;
         }
         Door.transform.localPosition = new Vector3(0, .025f, 0);
