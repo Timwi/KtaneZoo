@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Zoo;
+using System.Text.RegularExpressions;
 using UnityEngine;
-using System.Collections;
+using Zoo;
 
 using Rnd = UnityEngine.Random;
 
@@ -26,17 +27,19 @@ public class ZooModule : MonoBehaviour
     private KMSelectable[] _pedestals;
     private int[] _pedestalChildIndexes;
     private AnimalInfo[] _solutionLine;
+    private AnimalInfo[] _selection;    // what’s actually shown on the module once the door opens
+    private int[] _selectionPedestalIxs;    // what’s actually shown on the module once the door opens
 
-    private bool _isDoorOpen;
-    private bool _isSolved;
+    enum State { DoorClosed, DoorOpen, DoorClosing, Solved }
+    private State _state;
+
     private static int _moduleIdCounter = 1;
     private int _moduleId;
 
     void Start()
     {
         _moduleId = _moduleIdCounter++;
-        _isDoorOpen = false;
-        _isSolved = false;
+        _state = State.DoorClosed;
         StartCoroutine(Initialize());
     }
 
@@ -114,7 +117,7 @@ public class ZooModule : MonoBehaviour
         Door.OnInteract = delegate
         {
             Door.AddInteractionPunch();
-            if (!_isDoorOpen && !_isSolved)
+            if (_state == State.DoorClosed)
                 StartCoroutine(OpenDoor());
             return false;
         };
@@ -148,7 +151,6 @@ public class ZooModule : MonoBehaviour
 
     private IEnumerator OpenDoor()
     {
-        _isDoorOpen = true;
         yield return null;
 
         // Select three out of the five correct animals
@@ -156,15 +158,17 @@ public class ZooModule : MonoBehaviour
         // Select three out of the remaining wrong animals
         selection.AddRange(Data.Hexes.Values.Where(ai => !_solutionLine.Contains(ai)).ToArray().Shuffle().Take(3));
         selection.Shuffle();
+        _selection = selection.ToArray();
 
         var subprogress = _solutionLine.IndexOf(selection.Contains);
-        var abort = false;
+        _state = State.DoorOpen;
 
         // Select six of the pedestals to display these on
         foreach (var pedestal in _pedestals)
             pedestal.gameObject.SetActive(false);
-        var pedestalIxs = Enumerable.Range(0, _pedestals.Length).ToArray().Shuffle().Take(6).ToArray();
-        var pedestals = pedestalIxs.Select(ix => _pedestals[ix]).ToArray();
+
+        _selectionPedestalIxs = Enumerable.Range(0, _pedestals.Length).ToArray().Shuffle().Take(6).ToArray();
+        var pedestals = _selectionPedestalIxs.Select(ix => _pedestals[ix]).ToArray();
         var graphics = new List<GameObject>();
         for (int i = 0; i < 6; i++)
         {
@@ -176,13 +180,13 @@ public class ZooModule : MonoBehaviour
             {
                 pedestals[j].AddInteractionPunch(.5f);
                 Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, pedestals[j].transform);
-                if (abort)
+                if (_state != State.DoorOpen)
                     return false;
                 if (selection[j] != _solutionLine[subprogress])
                 {
                     Debug.LogFormat("[Zoo #{0}] You pressed {1}, I expected {2}. Strike.", _moduleId, selection[j].Name, _solutionLine[subprogress].Name);
                     Module.HandleStrike();
-                    abort = true;
+                    _state = State.DoorClosing;
                 }
                 else
                 {
@@ -194,8 +198,7 @@ public class ZooModule : MonoBehaviour
                     {
                         Debug.LogFormat("[Zoo #{0}] Module solved.", _moduleId);
                         Module.HandlePass();
-                        _isSolved = true;
-                        abort = true;
+                        _state = State.Solved;
                     }
                 }
                 return false;
@@ -213,7 +216,7 @@ public class ZooModule : MonoBehaviour
         }
         Door.transform.localPosition = new Vector3(-.135f, .025f, 0);
 
-        for (int i = 0; i < 60 && !abort; i++)
+        for (int i = 0; i < 60 && _state == State.DoorOpen; i++)
             yield return new WaitForSeconds(.1f);
 
         // SLIDE CLOSED
@@ -225,7 +228,7 @@ public class ZooModule : MonoBehaviour
         }
         Door.transform.localPosition = new Vector3(0, .025f, 0);
 
-        if (!abort)
+        if (_state == State.DoorOpen)
         {
             Debug.LogFormat("[Zoo #{0}] Not enough animals pressed before door closed. Strike.", _moduleId);
             Module.HandleStrike();
@@ -234,7 +237,59 @@ public class ZooModule : MonoBehaviour
         foreach (var graphic in graphics)
             Destroy(graphic);
         foreach (var pedestal in pedestals)
+        {
             pedestal.gameObject.SetActive(false);
-        _isDoorOpen = false;
+            pedestal.OnInteract = null;
+        }
+
+        if (_state != State.Solved)
+            _state = State.DoorClosed;
+    }
+
+    public string TwitchHelpMessage = @"press animal, animal, ...; for example: press Koala, Eagle, Kangaroo, Camel, Hyena. The module will open the door and automatically press the animals that are there. Acceptable animal names are: " + Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).JoinString(", ", lastSeparator: " and ");
+
+    private IEnumerator ProcessTwitchCommand(string command)
+    {
+        // The door could still be open from a previous command where someone didn’t press enough animals.
+        if (_state != State.DoorClosed)
+            yield break;
+
+        var m = Regex.Match(command, @"^press (.*)$");
+        if (!m.Success)
+            yield break;
+
+        var animals = m.Groups[1].Value.Split(',').Select(str => str.Trim()).ToArray();
+        var animalInfos = new AnimalInfo[animals.Length];
+        for (int i = 0; i < animals.Length; i++)
+        {
+            animalInfos[i] = Data.Hexes.Values.FirstOrDefault(v => v.Name.Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
+            if (animalInfos[i] == null)
+            {
+                yield return string.Format("sendtochat What the hell is a {0}?! I only know about {1}.", animals[i], Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).JoinString(", ", lastSeparator: " and "));
+                yield break;
+            }
+        }
+
+        Debug.LogFormat("[Zoo #{0}] Received Twitch Plays command to press: {1}.", _moduleId, animalInfos.Select(i => i.Name).JoinString(", "));
+        yield return null;
+
+        Door.OnInteract();
+        yield return new WaitForSeconds(1f);
+
+        for (int i = 0; i < animals.Length; i++)
+        {
+            yield return new WaitForSeconds(.1f);
+            var j = _selection.IndexOf(anml => anml.Name.Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
+            if (j == -1)
+                continue;
+
+            _pedestals[_selectionPedestalIxs[j]].OnInteract();
+            if (_state != State.DoorOpen)  // strike or solve
+                yield break;
+        }
+
+        // If you get here, you didn’t press enough animals.
+        // The time will run out and the door will close after some time.
+        yield return "strike";
     }
 }
