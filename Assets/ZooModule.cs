@@ -246,50 +246,63 @@ public class ZooModule : MonoBehaviour
             _state = State.DoorClosed;
     }
 
-    public string TwitchHelpMessage = @"press animal, animal, ...; for example: press Koala, Eagle, Kangaroo, Camel, Hyena. The module will open the door and automatically press the animals that are there. Acceptable animal names are: " + Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).JoinString(", ", lastSeparator: " and ");
+	public string TwitchHelpMessage = @"Use !{0} press animal, animal, ... to press a list of animals. !{0} animals provides the list of animals. Animal names can be partial.";
 
     private IEnumerator ProcessTwitchCommand(string command)
     {
-        // The door could still be open from a previous command where someone didn’t press enough animals.
-        if (_state != State.DoorClosed)
-            yield break;
+		var m = Regex.Match(command, @"^press (.*)$");
+		if (m.Success && _state == State.DoorClosed)
+		{
+			yield return null;
 
-        var m = Regex.Match(command, @"^press (.*)$");
-        if (!m.Success)
-            yield break;
+			var animals = m.Groups[1].Value.Split(',').Select(str => str.Trim()).ToArray();
+			var animalInfos = new AnimalInfo[animals.Length];
+			for (int i = 0; i < animals.Length; i++)
+			{
+				var matches = Data.Hexes.Values.Where(v => v.Name.ToLowerInvariant().Contains(animals[i].ToLowerInvariant()));
+				int matchCount = matches.Count();
+				if (matchCount == 1)
+				{
+					animalInfos[i] = matches.First();
+				}
+				else if (matchCount == 0)
+				{
+					yield return string.Format("sendtochat What the hell is a {0}?! Get your animal names straight with the !animals command.", animals[i]);
+					yield break;
+				}
+				else if (matchCount > 1)
+				{
+					yield return string.Format("sendtochat Be a little more specific! \"{0}\" matches {1}.", animals[i], matches.Select(x => x.Name).JoinString(", ", lastSeparator: " and "));
+					yield break;
+				}
+			}
 
-        var animals = m.Groups[1].Value.Split(',').Select(str => str.Trim()).ToArray();
-        var animalInfos = new AnimalInfo[animals.Length];
-        for (int i = 0; i < animals.Length; i++)
-        {
-            animalInfos[i] = Data.Hexes.Values.FirstOrDefault(v => v.Name.Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
-            if (animalInfos[i] == null)
-            {
-                yield return string.Format("sendtochat What the hell is a {0}?! I only know about {1}.", animals[i], Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).JoinString(", ", lastSeparator: " and "));
-                yield break;
-            }
-        }
+			Debug.LogFormat("[Zoo #{0}] Received Twitch Plays command to press: {1}.", _moduleId, animalInfos.Select(i => i.Name).JoinString(", "));
 
-        Debug.LogFormat("[Zoo #{0}] Received Twitch Plays command to press: {1}.", _moduleId, animalInfos.Select(i => i.Name).JoinString(", "));
-        yield return null;
+			Door.OnInteract();
+			yield return new WaitForSeconds(1f);
 
-        Door.OnInteract();
-        yield return new WaitForSeconds(1f);
+			for (int i = 0; i < animals.Length; i++)
+			{
+				yield return new WaitForSeconds(.1f);
+				var j = _selection.IndexOf(anml => anml.Name.Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
+				if (j == -1)
+					continue;
 
-        for (int i = 0; i < animals.Length; i++)
-        {
-            yield return new WaitForSeconds(.1f);
-            var j = _selection.IndexOf(anml => anml.Name.Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
-            if (j == -1)
-                continue;
+				_pedestals[_selectionPedestalIxs[j]].OnInteract();
+				if (_state != State.DoorOpen)  // strike or solve
+					yield break;
+			}
 
-            _pedestals[_selectionPedestalIxs[j]].OnInteract();
-            if (_state != State.DoorOpen)  // strike or solve
-                yield break;
-        }
-
-        // If you get here, you didn’t press enough animals.
-        // The time will run out and the door will close after some time.
-        yield return "strike";
+			// If you get here, you didn’t press enough animals.
+			// The time will run out and the door will close after some time.
+			yield return "strike";
+		}
+		else if (Regex.Match(command, @"^animals$").Success)
+		{
+			yield return null;
+			yield return "sendtochat Valid animals: " + Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).JoinString(", ", lastSeparator: " and ");
+			yield break;
+		}
     }
 }
