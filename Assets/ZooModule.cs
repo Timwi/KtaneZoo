@@ -246,17 +246,10 @@ public class ZooModule : MonoBehaviour
             _state = State.DoorClosed;
     }
 
-    public string TwitchHelpMessage = @"Use “!{0} press animal, animal, ...” to press a list of animals. “!{0} animals” provides the list of animals.";
+    public string TwitchHelpMessage = @"press animal, animal, ...; for example: press Koala, Eagle, Kangaroo, Camel, Hyena. The module will open the door and automatically press the animals that are there. Acceptable animal names are: " + Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).JoinString(", ", lastSeparator: " and ");
 
     private IEnumerator ProcessTwitchCommand(string command)
     {
-        if (command == "animals")
-        {
-            yield return null;
-            yield return "sendtochat Valid animals: " + Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).JoinString(", ", lastSeparator: " and ") + ".";
-            yield break;
-        }
-
         // The door could still be open from a previous command where someone didn’t press enough animals.
         if (_state != State.DoorClosed)
             yield break;
@@ -272,7 +265,7 @@ public class ZooModule : MonoBehaviour
             animalInfos[i] = Data.Hexes.Values.FirstOrDefault(v => v.Name.Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
             if (animalInfos[i] == null)
             {
-                yield return string.Format("sendtochat What the hell is a {0}?! Get your animal names straight with the “!<#> animals” command.", animals[i]);
+                yield return string.Format("sendtochat What the hell is a {0}?! I only know about {1}.", animals[i], Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).JoinString(", ", lastSeparator: " and "));
                 yield break;
             }
         }
