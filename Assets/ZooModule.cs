@@ -246,7 +246,7 @@ public class ZooModule : MonoBehaviour
             _state = State.DoorClosed;
     }
 
-    public string TwitchHelpMessage = @"Use “!{0} press animal, animal, ...” to press a list of animals. “!{0} animals” provides the list of animals. Animal names can be partial.";
+    public string TwitchHelpMessage = @"Use “!{0} press animal, animal, ...” to press a list of animals. “!{0} animals” provides the list of animals.";
 
     private IEnumerator ProcessTwitchCommand(string command)
     {
@@ -257,56 +257,46 @@ public class ZooModule : MonoBehaviour
             yield break;
         }
 
+        // The door could still be open from a previous command where someone didn’t press enough animals.
+        if (_state != State.DoorClosed)
+            yield break;
+
         var m = Regex.Match(command, @"^press (.*)$");
-        if (m.Success && _state == State.DoorClosed)
+        if (!m.Success)
+            yield break;
+
+        var animals = m.Groups[1].Value.Split(',').Select(str => str.Trim()).ToArray();
+        var animalInfos = new AnimalInfo[animals.Length];
+        for (int i = 0; i < animals.Length; i++)
         {
-            yield return null;
-
-            var animals = m.Groups[1].Value.Split(',').Select(str => str.Trim()).ToArray();
-            var animalInfos = new AnimalInfo[animals.Length];
-            for (int i = 0; i < animals.Length; i++)
+            animalInfos[i] = Data.Hexes.Values.FirstOrDefault(v => v.Name.Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
+            if (animalInfos[i] == null)
             {
-                // Find exact match first
-                var matches = Data.Hexes.Values.Where(v => v.Name.ToLowerInvariant().Equals(animals[i].ToLowerInvariant())).ToArray();
-
-                // Find partial matches only if an exact match doesn’t exist
-                if (matches.Length == 0)
-                    matches = Data.Hexes.Values.Where(v => v.Name.ToLowerInvariant().Contains(animals[i].ToLowerInvariant())).ToArray();
-
-                if (matches.Length == 1)
-                    animalInfos[i] = matches[0];
-                else if (matches.Length == 0)
-                {
-                    yield return string.Format("sendtochat What the hell is a {0}?! Get your animal names straight with the !animals command.", animals[i]);
-                    yield break;
-                }
-                else if (matches.Length > 1)
-                {
-                    yield return string.Format("sendtochat Be a little more specific! “{0}” matches {1}.", animals[i], matches.Select(x => x.Name).JoinString(", ", lastSeparator: " and "));
-                    yield break;
-                }
+                yield return string.Format("sendtochat What the hell is a {0}?! Get your animal names straight with the “!<#> animals” command.", animals[i]);
+                yield break;
             }
-
-            Debug.LogFormat("[Zoo #{0}] Received Twitch Plays command to press: {1}.", _moduleId, animalInfos.Select(i => i.Name).JoinString(", "));
-
-            Door.OnInteract();
-            yield return new WaitForSeconds(1f);
-
-            for (int i = 0; i < animalInfos.Length; i++)
-            {
-                yield return new WaitForSeconds(.1f);
-                var j = Array.IndexOf(_selection, animalInfos[i]);
-                if (j == -1)
-                    continue;
-
-                _pedestals[_selectionPedestalIxs[j]].OnInteract();
-                if (_state != State.DoorOpen)  // strike or solve
-                    yield break;
-            }
-
-            // If you get here, you didn’t press enough animals.
-            // The time will run out and the door will close after some time.
-            yield return "strike";
         }
+
+        Debug.LogFormat("[Zoo #{0}] Received Twitch Plays command to press: {1}.", _moduleId, animalInfos.Select(i => i.Name).JoinString(", "));
+        yield return null;
+
+        Door.OnInteract();
+        yield return new WaitForSeconds(1f);
+
+        for (int i = 0; i < animalInfos.Length; i++)
+        {
+            yield return new WaitForSeconds(.1f);
+            var j = Array.IndexOf(_selection, animalInfos[i]);
+            if (j == -1)
+                continue;
+
+            _pedestals[_selectionPedestalIxs[j]].OnInteract();
+            if (_state != State.DoorOpen)  // strike or solve
+                yield break;
+        }
+
+        // If you get here, you didn’t press enough animals.
+        // The time will run out and the door will close after some time.
+        yield return "strike";
     }
 }
