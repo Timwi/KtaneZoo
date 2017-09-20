@@ -246,10 +246,31 @@ public class ZooModule : MonoBehaviour
             _state = State.DoorClosed;
     }
 
-    public string TwitchHelpMessage = @"press animal, animal, ...; for example: press Koala, Eagle, Kangaroo, Camel, Hyena. The module will open the door and automatically press the animals that are there. Acceptable animal names are: " + Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).JoinString(", ", lastSeparator: " and ");
+    public string TwitchHelpMessage = @"“!{0} press animal, animal, ...”; for example: “press Koala, Eagle, Kangaroo, Camel, Hyena”. The module will open the door and automatically press the animals that are there. Type “!{0} animals” to get a list of acceptable animal names.";
+
+    private static string _animalListMsg1;
+    private static string _animalListMsg2;
+
+    private static void getAnimalListMsgs()
+    {
+        if (_animalListMsg1 == null)
+        {
+            var animalNames = Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).ToArray();
+            _animalListMsg1 = string.Format("sendtochat {0},", animalNames.Take(animalNames.Length / 2).JoinString(", "));
+            _animalListMsg2 = string.Format("sendtochat {0}.", animalNames.Skip(animalNames.Length / 2).JoinString(", ", lastSeparator: " and "));
+        }
+    }
 
     private IEnumerator ProcessTwitchCommand(string command)
     {
+        if (command == "animals")
+        {
+            yield return "sendtochat Acceptable animal names are:";
+            getAnimalListMsgs();
+            yield return _animalListMsg1;
+            yield return _animalListMsg2;
+        }
+
         // The door could still be open from a previous command where someone didn’t press enough animals.
         if (_state != State.DoorClosed)
             yield break;
@@ -265,7 +286,10 @@ public class ZooModule : MonoBehaviour
             animalInfos[i] = Data.Hexes.Values.FirstOrDefault(v => v.Name.Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
             if (animalInfos[i] == null)
             {
-                yield return string.Format("sendtochat What the hell is a {0}?! I only know about {1}.", animals[i], Data.Hexes.Values.Select(v => v.Name).OrderBy(v => v).JoinString(", ", lastSeparator: " and "));
+                yield return string.Format("sendtochat What the hell is a {0}?! I only know about the following animals:", animals[i]);
+                getAnimalListMsgs();
+                yield return _animalListMsg1;
+                yield return _animalListMsg2;
                 yield break;
             }
         }
