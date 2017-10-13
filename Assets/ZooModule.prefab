@@ -271,15 +271,6 @@ MonoBehaviour:
   PedestalsParent: {fileID: 1000012445730640}
   Animal: {fileID: 1000013159929488}
   PlaneMesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
-  TwitchHelpMessage: 'press animal, animal, ...; for example: press Koala, Eagle,
-    Kangaroo, Camel, Hyena. The module will open the door and automatically press
-    the animals that are there. Acceptable animal names are: Ant, Apatosaurus, Bat,
-    Bear, Beaver, Butterfly, Camel, Cat, Cobra, Cow, Crab, Dimetrodon, Dolphin, Dragonfly,
-    Dromedary, Duck, Eagle, Elephant, Ferret, Flamingo, Fly, Fox, Frog, Giraffe, Goose,
-    Gorilla, Hippopotamus, Horse, Hyena, Kangaroo, Koala, Lion, Llama, Lobster, Monkey,
-    Mouse, Otter, Owl, Pig, Porcupine, Pterodactyl, Rabbit, Rhinoceros, Rooster, Salamander,
-    Sea Horse, Seal, Skunk, Snail, Spider, Squirrel, Starfish, Stegosaurus, Swallow,
-    Tortoise, Triceratops, Tyrannosaurus Rex, Viper, Warthog, Wolf and Woodpecker'
 --- !u!114 &11489324
 MonoBehaviour:
   m_ObjectHideFlags: 1

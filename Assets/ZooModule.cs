@@ -246,7 +246,9 @@ public class ZooModule : MonoBehaviour
             _state = State.DoorClosed;
     }
 
-    public string TwitchHelpMessage = @"“!{0} press animal, animal, ...”; for example: “press Koala, Eagle, Kangaroo, Camel, Hyena”. The module will open the door and automatically press the animals that are there. Type “!{0} animals” to get a list of acceptable animal names.";
+#pragma warning disable 414
+    private string TwitchHelpMessage = @"“!{0} press animal, animal, ...”; for example: “press Koala, Eagle, Kangaroo, Camel, Hyena”. The module will open the door and automatically press the animals that are there. Type “!{0} animals” to get a list of acceptable animal names.";
+#pragma warning restore 414
 
     private static string _animalListMsg1;
     private static string _animalListMsg2;
