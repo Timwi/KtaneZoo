@@ -196,7 +196,6 @@ public class ZooModule : MonoBehaviour
 
     private GameObject CreateGraphic(string animal, float x, float y, float z, float scale, Transform parent)
     {
-        Debug.Log("-- Animal texture: " + animal);
         var graphic = Instantiate(Animal);
         graphic.name = animal;
         graphic.transform.parent = parent;
