@@ -346,7 +346,7 @@ public class ZooModule : MonoBehaviour
         if (_state != State.DoorClosed)
             yield break;
 
-        var m = Regex.Match(command, @"^press (.*)$");
+        var m = Regex.Match(command, @"^press (.*)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         if (!m.Success)
             yield break;
 
