@@ -344,11 +344,17 @@ public class ZooModule : MonoBehaviour
 
         // The door could still be open from a previous command where someone didn’t press enough animals.
         if (_state != State.DoorClosed)
+        {
+            yield return null;
+            yield return "sendtochat I’m going to ignore that command because the door is still open from a previous command.";
             yield break;
+        }
 
         var m = Regex.Match(command, @"^press (.*)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
         if (!m.Success)
             yield break;
+
+        yield return null;
 
         var animals = m.Groups[1].Value.Split(',').Select(str => str.Trim()).ToArray();
         var animalInfos = new KeyValuePair<Hex, string>[animals.Length];
@@ -366,7 +372,6 @@ public class ZooModule : MonoBehaviour
         }
 
         Debug.LogFormat("[Zoo #{0}] Received Twitch Plays command to press: {1}.", _moduleId, animalInfos.Select(i => i.Value).JoinString(", "));
-        yield return null;
 
         Door.OnInteract();
         yield return new WaitForSeconds(1f);
