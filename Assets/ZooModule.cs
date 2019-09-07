@@ -38,8 +38,8 @@ public class ZooModule : MonoBehaviour
     private int _moduleId;
 
     private static Dictionary<Hex, string> _inGrid;
-    private static List<string> _outGridQ = new List<string> { "Gazelle", "Caracal", "Cheetah", "Ocelot", "Sheep", "Caterpillar", "Groundhog", "Armadillo", "Orca" };
-    private static List<string> _outGridR = new List<string> { "Plesiosaur", "Penguin", "Baboon", "Whale", "Squid", "Coyote", "Ram", "Deer", "Crocodile" };
+    private static readonly List<string> _outGridQ = new List<string> { "Gazelle", "Caracal", "Cheetah", "Ocelot", "Sheep", "Caterpillar", "Groundhog", "Armadillo", "Orca" };
+    private static readonly List<string> _outGridR = new List<string> { "Plesiosaur", "Penguin", "Baboon", "Whale", "Squid", "Coyote", "Ram", "Deer", "Crocodile" };
 
     static ZooModule()
     {
@@ -319,16 +319,14 @@ public class ZooModule : MonoBehaviour
     private string TwitchHelpMessage = @"“!{0} press animal, animal, ...”; for example: “press Koala, Eagle, Kangaroo, Camel, Hyena”. The module will open the door and automatically press the animals that are there. Type “!{0} animals” to get a list of acceptable animal names.";
 #pragma warning restore 414
 
-    private static string _animalListMsg1;
-    private static string _animalListMsg2;
+    private static string _animalListMsg;
 
     private static void getAnimalListMsgs()
     {
-        if (_animalListMsg1 == null)
+        if (_animalListMsg == null)
         {
             var animalNames = _inGrid.Values.OrderBy(v => v).ToArray();
-            _animalListMsg1 = string.Format("sendtochat {0},", animalNames.Take(animalNames.Length / 2).JoinString(", "));
-            _animalListMsg2 = string.Format("sendtochat {0}.", animalNames.Skip(animalNames.Length / 2).JoinString(", ", lastSeparator: " and "));
+            _animalListMsg = string.Format("\n{0},\n{1}.", animalNames.Take(animalNames.Length / 2).JoinString(", "), animalNames.Skip(animalNames.Length / 2).JoinString(", ", lastSeparator: " and "));
         }
     }
 
@@ -336,10 +334,8 @@ public class ZooModule : MonoBehaviour
     {
         if (command == "animals")
         {
-            yield return "sendtochat Acceptable animal names are:";
             getAnimalListMsgs();
-            yield return _animalListMsg1;
-            yield return _animalListMsg2;
+            yield return "sendtochat Acceptable animal names are:" + _animalListMsg;
         }
 
         // The door could still be open from a previous command where someone didn’t press enough animals.
@@ -363,10 +359,8 @@ public class ZooModule : MonoBehaviour
             animalInfos[i] = _inGrid.FirstOrDefault(kvp => kvp.Value.Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
             if (animalInfos[i].Value == null)
             {
-                yield return string.Format("sendtochat What the hell is a {0}?! I only know about the following animals:", animals[i]);
                 getAnimalListMsgs();
-                yield return _animalListMsg1;
-                yield return _animalListMsg2;
+                yield return string.Format("sendtochat What the hell is a “{0}”?! I only know about the following animals:{1}", animals[i], _animalListMsg);
                 yield break;
             }
         }
