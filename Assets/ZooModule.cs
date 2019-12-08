@@ -22,7 +22,6 @@ public class ZooModule : MonoBehaviour
     public KMSelectable Door;
     public GameObject PedestalsParent;
     public GameObject Animal;
-    public Mesh PlaneMesh;
     public Texture[] AnimalImages;
 
     private KMSelectable[] _pedestals;
@@ -179,8 +178,8 @@ public class ZooModule : MonoBehaviour
 
         // Put the coordinate animals on the front of the door
         var mult = Rnd.Range(0, 2) == 0 ? -1 : 1;
-        CreateGraphic(_outGridQ[inf.Line[0].Q + 4], .35f * mult, -.0499f, -.35f * mult, .07f, Door.transform);
-        CreateGraphic(_outGridR[inf.Line[0].R + 4], -.35f * mult, -.0499f, .35f * mult, .07f, Door.transform);
+        CreateGraphic(_outGridQ[inf.Line[0].Q + 4], .35f * mult, -.0499f, -.35f * mult, .7f, Door.transform);
+        CreateGraphic(_outGridR[inf.Line[0].R + 4], -.35f * mult, -.0499f, .35f * mult, .7f, Door.transform);
 
         // Remember the solution line
         _solutionLine = inf.Line.Select(h => _inGrid[h]).ToArray();
@@ -200,22 +199,11 @@ public class ZooModule : MonoBehaviour
         graphic.name = animal;
         graphic.transform.parent = parent;
         graphic.transform.localPosition = new Vector3(x, y, z);
-        graphic.transform.localRotation = Quaternion.Euler(0, 180, 0);
+        graphic.transform.localRotation = Quaternion.Euler(90, 0, 0);
         graphic.transform.localScale = new Vector3(scale, scale, scale);
-        graphic.AddComponent<MeshFilter>().mesh = PlaneMesh;
-        var mr = graphic.AddComponent<MeshRenderer>();
-        mr.material.mainTexture = AnimalImages.First(at => at.name == animal);
-        mr.material.shader = Shader.Find("Unlit/Transparent");
+        graphic.GetComponent<MeshRenderer>().material.mainTexture = AnimalImages.First(at => at.name == animal);
+        graphic.SetActive(true);
         return graphic;
-    }
-
-    private float easeInOutQuad(float time, float start, float end, float duration)
-    {
-        time /= duration / 2;
-        if (time < 1)
-            return (end - start) / 2 * time * time + start;
-        time--;
-        return -(end - start) / 2 * (time * (time - 2) - 1) + start;
     }
 
     private IEnumerator OpenDoor()
@@ -241,7 +229,7 @@ public class ZooModule : MonoBehaviour
         var graphics = new List<GameObject>();
         for (int i = 0; i < 6; i++)
         {
-            graphics.Add(CreateGraphic(selection[i], 0, .2501f, 0, .16f, pedestals[i].transform));
+            graphics.Add(CreateGraphic(selection[i], 0, .2501f, 0, 1.6f, pedestals[i].transform));
             pedestals[i].gameObject.SetActive(true);
 
             // Need an extra function scope to work around bug in Mono C# compiler
@@ -280,7 +268,7 @@ public class ZooModule : MonoBehaviour
         Audio.PlaySoundAtTransform("SlidingSound", Door.transform);
         for (float t = 0; t < 1; t += Time.deltaTime * 1.5f)
         {
-            Door.transform.localPosition = new Vector3(easeInOutQuad(t, 0, -.135f, 1), .025f, 0);
+            Door.transform.localPosition = new Vector3(Easing.InOutQuad(t, 0, -.135f, 1), .025f, 0);
             yield return null;
         }
         Door.transform.localPosition = new Vector3(-.135f, .025f, 0);
@@ -292,7 +280,7 @@ public class ZooModule : MonoBehaviour
         Audio.PlaySoundAtTransform("SlidingSound", Door.transform);
         for (float t = 0; t < 1; t += Time.deltaTime * 1.5f)
         {
-            Door.transform.localPosition = new Vector3(easeInOutQuad(t, -.135f, 0, 1), .025f, 0);
+            Door.transform.localPosition = new Vector3(Easing.InOutQuad(t, -.135f, 0, 1), .025f, 0);
             yield return null;
         }
         Door.transform.localPosition = new Vector3(0, .025f, 0);
