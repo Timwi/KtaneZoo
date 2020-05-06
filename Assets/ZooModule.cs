@@ -374,4 +374,30 @@ public class ZooModule : MonoBehaviour
         // The time will run out and the door will close after some time.
         yield return "strike";
     }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        while (_state != State.DoorClosed)
+            yield return true;
+
+        Door.OnInteract();
+        yield return new WaitForSeconds(1f);
+
+        Debug.LogFormat(@"_solutionLine = {0}", _solutionLine.JoinString(", "));
+        Debug.LogFormat(@"_selection = {0}", _selection.JoinString(", "));
+        Debug.LogFormat(@"_selectionPedestalIxs = {0}", _selectionPedestalIxs.JoinString(", "));
+        Debug.LogFormat(@"_pedestals = {0}", _pedestals.Select(n => n.name).JoinString(", "));
+
+        foreach (var animal in _solutionLine)
+        {
+            var ix = Array.IndexOf(_selection, animal);
+            if (ix == -1)
+                continue;
+            _pedestals[_selectionPedestalIxs[ix]].OnInteract();
+            yield return new WaitForSeconds(.1f);
+        }
+
+        while (_state != State.Solved)
+            yield return true;
+    }
 }
