@@ -36,6 +36,8 @@ public class ZooModule : MonoBehaviour
     private static int _moduleIdCounter = 1;
     private int _moduleId;
 
+    private ZooSettings settings = new ZooSettings();
+
     private static Dictionary<Hex, string> _inGrid;
     private static readonly List<string> _outGridQ = new List<string> { "Gazelle", "Caracal", "Cheetah", "Ocelot", "Sheep", "Caterpillar", "Groundhog", "Armadillo", "Orca" };
     private static readonly List<string> _outGridR = new List<string> { "Plesiosaur", "Penguin", "Baboon", "Whale", "Squid", "Coyote", "Ram", "Deer", "Crocodile" };
@@ -108,6 +110,9 @@ public class ZooModule : MonoBehaviour
 
     void Start()
     {
+        ModConfig<ZooSettings> modConfig = new ModConfig<ZooSettings>("ZooSettings");
+        settings = modConfig.Settings;
+        modConfig.Settings = settings;
         _moduleId = _moduleIdCounter++;
         _state = State.DoorClosed;
         StartCoroutine(Initialize());
@@ -273,7 +278,10 @@ public class ZooModule : MonoBehaviour
         }
         Door.transform.localPosition = new Vector3(-.135f, .025f, 0);
 
-        for (int i = 0; i < 60 && _state == State.DoorOpen; i++)
+        var secondsCount = settings.seconds > 0 ? settings.seconds : 6;
+        if (settings.seconds < 1)
+            Debug.LogFormat("<Zoo #{0}> Seconds count was set to an invalid value, defaulting to 6.", _moduleId);
+        for (int i = 0; i < secondsCount * 10 && _state == State.DoorOpen; i++)
             yield return new WaitForSeconds(.1f);
 
         // SLIDE CLOSED
@@ -400,4 +408,30 @@ public class ZooModule : MonoBehaviour
         while (_state != State.Solved)
             yield return true;
     }
+
+    class ZooSettings
+    {
+        public int seconds = 6;
+    }
+
+    #pragma warning disable 414
+    private static Dictionary<string, object>[] TweaksEditorSettings = new Dictionary<string, object>[]
+    {
+        new Dictionary<string, object>
+        {
+            { "Filename", "ZooSettings.json" },
+            { "Name", "Zoo" },
+            {
+                "Listing", new List<Dictionary<string, object>>
+                {
+                    new Dictionary<string, object>
+                    {
+                        { "Key", "Seconds count" },
+                        { "Text", "The number of seconds for which the door stays open." }
+                    }
+                }
+            }
+        }
+    };
+    #pragma warning restore 414
 }
