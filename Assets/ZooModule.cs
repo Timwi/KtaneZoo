@@ -110,9 +110,14 @@ public class ZooModule : MonoBehaviour
 
     void Start()
     {
-        ModConfig<ZooSettings> modConfig = new ModConfig<ZooSettings>("ZooSettings");
-        settings = modConfig.Settings;
-        modConfig.Settings = settings;
+        var modConfig = new ModConfig<ZooSettings>("ZooSettings");
+        settings = modConfig.ReadSettings();
+        if (settings.seconds < 1)
+        {
+            settings.seconds = 6;
+            Debug.LogFormat("<Zoo #{0}> Seconds count was set to an invalid value, defaulting to 6.", _moduleId);
+        }
+        modConfig.WriteSettings(settings);
         _moduleId = _moduleIdCounter++;
         _state = State.DoorClosed;
         StartCoroutine(Initialize());
@@ -278,10 +283,7 @@ public class ZooModule : MonoBehaviour
         }
         Door.transform.localPosition = new Vector3(-.135f, .025f, 0);
 
-        var secondsCount = settings.seconds > 0 ? settings.seconds : 6;
-        if (settings.seconds < 1)
-            Debug.LogFormat("<Zoo #{0}> Seconds count was set to an invalid value, defaulting to 6.", _moduleId);
-        for (int i = 0; i < secondsCount * 10 && _state == State.DoorOpen; i++)
+        for (int i = 0; i < settings.seconds * 10 && _state == State.DoorOpen; i++)
             yield return new WaitForSeconds(.1f);
 
         // SLIDE CLOSED
@@ -409,7 +411,7 @@ public class ZooModule : MonoBehaviour
         public int seconds = 6;
     }
 
-    #pragma warning disable 414
+#pragma warning disable 414
     private static Dictionary<string, object>[] TweaksEditorSettings = new Dictionary<string, object>[]
     {
         new Dictionary<string, object>
@@ -428,5 +430,5 @@ public class ZooModule : MonoBehaviour
             }
         }
     };
-    #pragma warning restore 414
+#pragma warning restore 414
 }
