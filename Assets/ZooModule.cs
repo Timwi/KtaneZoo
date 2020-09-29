@@ -348,11 +348,11 @@ public class ZooModule : MonoBehaviour
 
         yield return null;
 
-        var animals = m.Groups[1].Value.Split(',').Select(str => str.Trim()).ToArray();
+        var animals = m.Groups[1].Value.Split(',').Select(str => str.Trim().Replace(" ", "")).ToArray();
         var animalInfos = new KeyValuePair<Hex, string>[animals.Length];
         for (int i = 0; i < animals.Length; i++)
         {
-            animalInfos[i] = _inGrid.FirstOrDefault(kvp => kvp.Value.Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
+            animalInfos[i] = _inGrid.FirstOrDefault(kvp => kvp.Value.Trim().Replace(" ", "").Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
             if (animalInfos[i].Value == null)
             {
                 getAnimalListMsgs();
@@ -369,11 +369,11 @@ public class ZooModule : MonoBehaviour
         for (int i = 0; i < animalInfos.Length; i++)
         {
             yield return new WaitForSeconds(.1f);
-            var j = Array.IndexOf(_selection, animalInfos[i].Value);
-            if (j == -1)
+            var ix = Array.IndexOf(_selection, animalInfos[i].Value);
+            if (ix == -1)
                 continue;
 
-            _pedestals[_selectionPedestalIxs[j]].OnInteract();
+            _pedestals[_selectionPedestalIxs[ix]].OnInteract();
             if (_state != State.DoorOpen)  // strike or solve
                 yield break;
         }
@@ -390,11 +390,6 @@ public class ZooModule : MonoBehaviour
 
         Door.OnInteract();
         yield return new WaitForSeconds(1f);
-
-        Debug.LogFormat(@"_solutionLine = {0}", _solutionLine.JoinString(", "));
-        Debug.LogFormat(@"_selection = {0}", _selection.JoinString(", "));
-        Debug.LogFormat(@"_selectionPedestalIxs = {0}", _selectionPedestalIxs.JoinString(", "));
-        Debug.LogFormat(@"_pedestals = {0}", _pedestals.Select(n => n.name).JoinString(", "));
 
         foreach (var animal in _solutionLine)
         {
