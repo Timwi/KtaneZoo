@@ -355,6 +355,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: c052087dc6071264cb5ff6397e4f58f6, type: 3}
   - {fileID: 2800000, guid: 92dd6900edffdbd48864786ab930349f, type: 3}
   - {fileID: 2800000, guid: 73220a8d7ebe5f346b676bc777d5b866, type: 3}
+  CheatBackground: {fileID: 2100000, guid: e2d313dbda7eec54abdcfaf3c35d2822, type: 2}
 --- !u!114 &11489324
 MonoBehaviour:
   m_ObjectHideFlags: 1

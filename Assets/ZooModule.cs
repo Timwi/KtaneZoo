@@ -23,6 +23,7 @@ public class ZooModule : MonoBehaviour
     public GameObject PedestalsParent;
     public GameObject Animal;
     public Texture[] AnimalImages;
+    public Material CheatBackground;
 
     private KMSelectable[] _pedestals;
     private int[] _pedestalChildIndexes;
@@ -112,10 +113,16 @@ public class ZooModule : MonoBehaviour
     {
         var modConfig = new ModConfig<ZooSettings>("ZooSettings");
         settings = modConfig.ReadSettings();
-        if (settings.seconds < 1)
+        if (settings.Seconds < 1)
         {
-            settings.seconds = 6;
-            Debug.LogFormat("<Zoo #{0}> Seconds count was set to an invalid value, defaulting to 6.", _moduleId);
+            settings.Seconds = 6;
+            Debug.LogFormat("[Zoo #{0}] Seconds count was set to an invalid value, defaulting to 6.", _moduleId);
+        }
+        else if (settings.Seconds != 6)
+        {
+            Debug.LogFormat("[Zoo #{0}] Seconds count set to {1}. Official rules are 6 seconds.", _moduleId, settings.Seconds);
+            if (settings.Seconds > 6)
+                Module.transform.Find("ComponentBackground").GetComponent<MeshRenderer>().sharedMaterial = CheatBackground;
         }
         modConfig.WriteSettings(settings);
         _moduleId = _moduleIdCounter++;
@@ -283,7 +290,7 @@ public class ZooModule : MonoBehaviour
         }
         Door.transform.localPosition = new Vector3(-.135f, .025f, 0);
 
-        for (int i = 0; i < settings.seconds * 10 && _state == State.DoorOpen; i++)
+        for (int i = 0; i < settings.Seconds * 10 && _state == State.DoorOpen; i++)
             yield return new WaitForSeconds(.1f);
 
         // SLIDE CLOSED
@@ -406,9 +413,9 @@ public class ZooModule : MonoBehaviour
             yield return true;
     }
 
-    class ZooSettings
+    sealed class ZooSettings
     {
-        public int seconds = 6;
+        public int Seconds = 6;
     }
 
 #pragma warning disable 414
