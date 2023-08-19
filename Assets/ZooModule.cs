@@ -290,8 +290,11 @@ public class ZooModule : MonoBehaviour
         }
         Door.transform.localPosition = new Vector3(-.135f, .025f, 0);
 
-        for (int i = 0; i < settings.Seconds * 10 && _state == State.DoorOpen; i++)
-            yield return new WaitForSeconds(.1f);
+        var startTime = Time.time;
+        while (Time.time - startTime < settings.Seconds && _state == State.DoorOpen)
+            yield return null;
+        if (_state != State.DoorOpen)
+            Debug.LogFormat("[Zoo #{0}] Door closes with {1} seconds left on the timer.", _moduleId, settings.Seconds - (Time.time - startTime));
 
         // SLIDE CLOSED
         Audio.PlaySoundAtTransform("SlidingSound", Door.transform);
