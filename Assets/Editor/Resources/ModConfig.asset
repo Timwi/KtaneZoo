@@ -13,6 +13,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: Zoo
   title: Zoo
+  author: Timwi
   description: 'For the animal lovers among the bomb defusal troupe.
 
 

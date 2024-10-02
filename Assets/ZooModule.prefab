@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 11489324}
   - component: {fileID: 11496072}
   - component: {fileID: 11489182}
+  - component: {fileID: 114390358943613554}
   m_Layer: 0
   m_Name: ZooModule
   m_TagString: Untagged
@@ -272,6 +273,7 @@ MonoBehaviour:
   Module: {fileID: 11429752}
   Audio: {fileID: 11496072}
   MainSelectable: {fileID: 11420650}
+  RuleSeedable: {fileID: 114390358943613554}
   Door: {fileID: 114000012607088804}
   PedestalsParent: {fileID: 1000012445730640}
   Animal: {fileID: 1000013159929488}
@@ -2436,3 +2438,15 @@ MonoBehaviour:
   AllowSelectionWrapY: 0
   ForceSelectionHighlight: 0
   ForceInteractionHighlight: 0
+--- !u!114 &114390358943613554
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 127088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adf69c2de51bd3c43bbd9bc22578ee08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _seed: 1

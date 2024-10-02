@@ -18,6 +18,7 @@ public class ZooModule : MonoBehaviour
     public KMBombModule Module;
     public KMAudio Audio;
     public KMSelectable MainSelectable;
+    public KMRuleSeedable RuleSeedable;
 
     public KMSelectable Door;
     public GameObject PedestalsParent;
@@ -39,75 +40,15 @@ public class ZooModule : MonoBehaviour
 
     private ZooSettings settings = new ZooSettings();
 
-    private static Dictionary<Hex, string> _inGrid;
-    private static readonly List<string> _outGridQ = new List<string> { "Gazelle", "Caracal", "Cheetah", "Ocelot", "Sheep", "Caterpillar", "Groundhog", "Armadillo", "Orca" };
-    private static readonly List<string> _outGridR = new List<string> { "Plesiosaur", "Penguin", "Baboon", "Whale", "Squid", "Coyote", "Ram", "Deer", "Crocodile" };
+    private static readonly string[] _inGridAnimals = { "Dragonfly", "Kangaroo", "Spider", "Tortoise", "Crab", "Hyena", "Camel", "Butterfly", "Llama", "Dromedary", "Warthog", "Wolf", "Viper", "Lion", "Seal", "Fly", "Lobster", "Cat", "Rooster", "Squirrel", "Gorilla", "Frog", "Salamander", "Goose", "Tyrannosaurus Rex", "Dimetrodon", "Bat", "Starfish", "Swallow", "Pterodactyl", "Porcupine", "Duck", "Apatosaurus", "Koala", "Ferret", "Eagle", "Triceratops", "Stegosaurus", "Bear", "Otter", "Fox", "Beaver", "Owl", "Elephant", "Woodpecker", "Cobra", "Giraffe", "Rhinoceros", "Hippopotamus", "Pig", "Sea Horse", "Mouse", "Flamingo", "Rabbit", "Monkey", "Snail", "Skunk", "Horse", "Dolphin", "Cow", "Ant" };
+    private static readonly string[] _outGridQAnimals = { "Groundhog", "Sheep", "Gazelle", "Ocelot", "Cheetah", "Armadillo", "Orca", "Caterpillar", "Caracal" };
+    private static readonly string[] _outGridRAnimals = { "Baboon", "Squid", "Whale", "Crocodile", "Deer", "Ram", "Plesiosaur", "Coyote", "Penguin" };
+    private static readonly PortType[] _portTypes = { PortType.StereoRCA, PortType.Parallel, PortType.Serial, PortType.PS2, PortType.RJ45, PortType.DVI };
 
-    static ZooModule()
-    {
-        _inGrid = new Dictionary<Hex, string>();
-        _inGrid[new Hex(0, -4)] = "Cow";
-        _inGrid[new Hex(1, -4)] = "Tyrannosaurus Rex";
-        _inGrid[new Hex(2, -4)] = "Rabbit";
-        _inGrid[new Hex(3, -4)] = "Horse";
-        _inGrid[new Hex(4, -4)] = "Flamingo";
-        _inGrid[new Hex(-1, -3)] = "Cat";
-        _inGrid[new Hex(0, -3)] = "Bat";
-        _inGrid[new Hex(1, -3)] = "Ant";
-        _inGrid[new Hex(2, -3)] = "Fly";
-        _inGrid[new Hex(3, -3)] = "Llama";
-        _inGrid[new Hex(4, -3)] = "Hyena";
-        _inGrid[new Hex(-2, -2)] = "Pig";
-        _inGrid[new Hex(-1, -2)] = "Owl";
-        _inGrid[new Hex(0, -2)] = "Rhinoceros";
-        _inGrid[new Hex(1, -2)] = "Tortoise";
-        _inGrid[new Hex(2, -2)] = "Sea Horse";
-        _inGrid[new Hex(3, -2)] = "Camel";
-        _inGrid[new Hex(4, -2)] = "Dimetrodon";
-        _inGrid[new Hex(-3, -1)] = "Spider";
-        _inGrid[new Hex(-2, -1)] = "Goose";
-        _inGrid[new Hex(-1, -1)] = "Snail";
-        _inGrid[new Hex(0, -1)] = "Monkey";
-        _inGrid[new Hex(1, -1)] = "Wolf";
-        _inGrid[new Hex(2, -1)] = "Kangaroo";
-        _inGrid[new Hex(3, -1)] = "Lobster";
-        _inGrid[new Hex(4, -1)] = "Dromedary";
-        _inGrid[new Hex(-4, 0)] = "Bear";
-        _inGrid[new Hex(-3, 0)] = "Dragonfly";
-        _inGrid[new Hex(-2, 0)] = "Butterfly";
-        _inGrid[new Hex(-1, 0)] = "Fox";
-        _inGrid[new Hex(0, 0)] = "Dolphin";
-        _inGrid[new Hex(1, 0)] = "Eagle";
-        _inGrid[new Hex(2, 0)] = "Porcupine";
-        _inGrid[new Hex(3, 0)] = "Otter";
-        _inGrid[new Hex(4, 0)] = "Warthog";
-        _inGrid[new Hex(-4, 1)] = "Ferret";
-        _inGrid[new Hex(-3, 1)] = "Lion";
-        _inGrid[new Hex(-2, 1)] = "Squirrel";
-        _inGrid[new Hex(-1, 1)] = "Giraffe";
-        _inGrid[new Hex(0, 1)] = "Koala";
-        _inGrid[new Hex(1, 1)] = "Crab";
-        _inGrid[new Hex(2, 1)] = "Frog";
-        _inGrid[new Hex(3, 1)] = "Swallow";
-        _inGrid[new Hex(-4, 2)] = "Stegosaurus";
-        _inGrid[new Hex(-3, 2)] = "Pterodactyl";
-        _inGrid[new Hex(-2, 2)] = "Cobra";
-        _inGrid[new Hex(-1, 2)] = "Hippopotamus";
-        _inGrid[new Hex(0, 2)] = "Triceratops";
-        _inGrid[new Hex(1, 2)] = "Duck";
-        _inGrid[new Hex(2, 2)] = "Starfish";
-        _inGrid[new Hex(-4, 3)] = "Elephant";
-        _inGrid[new Hex(-3, 3)] = "Rooster";
-        _inGrid[new Hex(-2, 3)] = "Woodpecker";
-        _inGrid[new Hex(-1, 3)] = "Apatosaurus";
-        _inGrid[new Hex(0, 3)] = "Beaver";
-        _inGrid[new Hex(1, 3)] = "Gorilla";
-        _inGrid[new Hex(-4, 4)] = "Mouse";
-        _inGrid[new Hex(-3, 4)] = "Seal";
-        _inGrid[new Hex(-2, 4)] = "Skunk";
-        _inGrid[new Hex(-1, 4)] = "Viper";
-        _inGrid[new Hex(0, 4)] = "Salamander";
-    }
+    // Filled in by rule seed
+    private Dictionary<Hex, string> _inGrid;
+    private string[] _outGridQ;
+    private string[] _outGridR;
 
     void Start()
     {
@@ -126,34 +67,36 @@ public class ZooModule : MonoBehaviour
         }
         modConfig.WriteSettings(settings);
         _moduleId = _moduleIdCounter++;
+
+
+        // ## START RULE SEED
+
+        var rnd = RuleSeedable.GetRNG();
+        Debug.Log($"[Zoo #{_moduleId}] Using rule seed: {rnd.Seed}");
+
+        var animals = rnd.ShuffleFisherYates(_inGridAnimals);
+        var largeHex = Hex.LargeHexagon(5).ToArray();
+        _inGrid = Enumerable.Range(0, largeHex.Length).ToDictionary(ix => largeHex[ix], ix => animals[ix]);
+        _outGridQ = rnd.ShuffleFisherYates(_outGridQAnimals.ToArray());
+        _outGridR = rnd.ShuffleFisherYates(_outGridRAnimals.ToArray());
+        var portTypeFromDir = rnd.ShuffleFisherYates(_portTypes.ToArray());
+        var mostCommonFirst = rnd.Next(0, 2) == 0;
+        Debug.Log(largeHex.Select(h => $"{h.Q},{h.R}").JoinString(";"));
+
+        // ## END RULE SEED
+
+
         _state = State.DoorClosed;
-        StartCoroutine(Initialize());
-    }
-
-    private IEnumerator Initialize()
-    {
-        var portTypes = Enum.GetValues(typeof(PortType)).Cast<PortType>().ToArray();
-
-        var portTypeToDir = new int[6];
-        portTypeToDir[(int) PortType.Parallel] = 0;
-        portTypeToDir[(int) PortType.DVI] = 1;
-        portTypeToDir[(int) PortType.StereoRCA] = 2;
-        portTypeToDir[(int) PortType.Serial] = 3;
-        portTypeToDir[(int) PortType.PS2] = 4;
-        portTypeToDir[(int) PortType.RJ45] = 5;
-
-        // Wait a little to ensure that edgework is available.
-        yield return new WaitForSeconds(.1f);
 
         _pedestals = MainSelectable.Children.Where(p => p != null && p.transform.parent == PedestalsParent.transform).ToArray();
 
-        var counts = Ut.NewArray(Bomb.GetPortPlateCount() + 1, j => j == 0 ? portTypes.ToHashSet() : new HashSet<PortType>());
+        var counts = Ut.NewArray(Bomb.GetPortPlateCount() + 1, j => j == 0 ? _portTypes.ToHashSet() : new HashSet<PortType>());
         foreach (var port in Bomb.GetPorts())
         {
-            var pIx = portTypes.IndexOf(pt => pt.ToString() == port);
+            var pIx = _portTypes.IndexOf(pt => pt.ToString() == port);
             if (pIx != -1)
             {
-                var pt = portTypes[pIx];
+                var pt = _portTypes[pIx];
                 var ix = counts.IndexOf(c => c.Contains(pt));
                 counts[ix].Remove(pt);
                 counts[ix + 1].Add(pt);
@@ -162,16 +105,16 @@ public class ZooModule : MonoBehaviour
 
         var hexes = Hex.LargeHexagon(5).Select(hex =>
         {
-            // Check the port types in order of most common to least common.
-            for (int c = counts.Length - 1; c >= 0; c--)
+            // Check the port types in order of most/least common to least/more common
+            for (var c = mostCommonFirst ? counts.Length - 1 : 0; mostCommonFirst ? c >= 0 : c < counts.Length; c = mostCommonFirst ? c - 1 : c + 1)
             {
                 // Check which of these port types can form a line of 5
-                var eligiblePortTypes = counts[c].Where(pt => Enumerable.Range(0, 5).All(dist => (hex + dist * Hex.GetDirection(portTypeToDir[(int) pt])).Distance < 5)).Take(2).ToArray();
+                var eligiblePortTypes = counts[c].Where(pt => Enumerable.Range(0, 5).All(dist => (hex + dist * Hex.GetDirection(Array.IndexOf(portTypeFromDir, pt))).Distance < 5)).Take(2).ToArray();
                 if (eligiblePortTypes.Length != 1)
                     continue;
 
                 // We found an eligible port type; return the line
-                return new { PortType = (PortType?) eligiblePortTypes[0], Line = Enumerable.Range(0, 5).Select(dist => hex + dist * Hex.GetDirection(portTypeToDir[(int) eligiblePortTypes[0]])).ToArray() };
+                return new { PortType = (PortType?) eligiblePortTypes[0], Line = Enumerable.Range(0, 5).Select(dist => hex + dist * Hex.GetDirection(Array.IndexOf(portTypeFromDir, eligiblePortTypes[0]))).ToArray() };
             }
 
             // Check if the two-step rule works for this hex
@@ -184,7 +127,7 @@ public class ZooModule : MonoBehaviour
 
         var inf = hexes.PickRandom();
         Debug.LogFormat("[Zoo #{0}] Animals shown on front: {1}, {2}", _moduleId, _outGridQ[inf.Line[0].Q + 4], _outGridR[inf.Line[0].R + 4]);
-        Debug.LogFormat("[Zoo #{0}] Line: {1} ({2})", _moduleId, inf.Line.Select(h => _inGrid[h]).JoinString(", "), inf.PortType == null ? "two-steps rule" : inf.PortType.ToString());
+        Debug.LogFormat("[Zoo #{0}] Line: {1} ({2})", _moduleId, inf.Line.Select(h => _inGrid[h]).JoinString(", "), inf.PortType == null ? "two-steps rule" : inf.PortType.Value.ToString());
 
         _pedestalChildIndexes = new int[_pedestals.Length];
         for (int i = 0; i < _pedestals.Length; i++)
@@ -323,9 +266,9 @@ public class ZooModule : MonoBehaviour
             _state = State.DoorClosed;
     }
 
-#pragma warning disable 414
-    private string TwitchHelpMessage = @"“!{0} press animal, animal, ...”; for example: “press Koala, Eagle, Kangaroo, Camel, Hyena”. The module will open the door and automatically press the animals that are there. Type “!{0} animals” to get a list of acceptable animal names.";
-#pragma warning restore 414
+#pragma warning disable 0414
+    private readonly string TwitchHelpMessage = @"“!{0} press animal, animal, ...”; for example: “press Koala, Eagle, Kangaroo, Camel, Hyena”. The module will open the door and automatically press the animals that are there. Type “!{0} animals” to get a list of acceptable animal names.";
+#pragma warning restore 0414
 
     private static string _animalListMsg;
 
@@ -333,7 +276,7 @@ public class ZooModule : MonoBehaviour
     {
         if (_animalListMsg == null)
         {
-            var animalNames = _inGrid.Values.OrderBy(v => v).ToArray();
+            var animalNames = _inGridAnimals.OrderBy(v => v).ToArray();
             _animalListMsg = string.Format("\n{0},\n{1}.", animalNames.Take(animalNames.Length / 2).JoinString(", "), animalNames.Skip(animalNames.Length / 2).JoinString(", ", lastSeparator: " and "));
         }
     }
@@ -421,24 +364,14 @@ public class ZooModule : MonoBehaviour
         public int Seconds = 6;
     }
 
-#pragma warning disable 414
-    private static Dictionary<string, object>[] TweaksEditorSettings = new Dictionary<string, object>[]
+    private static readonly Dictionary<string, object>[] TweaksEditorSettings = Ut.NewArray(new Dictionary<string, object>
     {
-        new Dictionary<string, object>
+        ["Filename"] = "ZooSettings.json",
+        ["Name"] = "Zoo",
+        ["Listing"] = Ut.NewArray(new Dictionary<string, object>
         {
-            { "Filename", "ZooSettings.json" },
-            { "Name", "Zoo" },
-            {
-                "Listing", new List<Dictionary<string, object>>
-                {
-                    new Dictionary<string, object>
-                    {
-                        { "Key", "Seconds count" },
-                        { "Text", "The number of seconds for which the door stays open." }
-                    }
-                }
-            }
-        }
-    };
-#pragma warning restore 414
+            ["Key"] = "Seconds count",
+            ["Text"] = "The number of seconds for which the door stays open."
+        }).ToList()
+    });
 }

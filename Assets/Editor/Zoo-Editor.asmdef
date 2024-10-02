@@ -1,0 +1,10 @@
+{
+  "name": "Zoo-Editor",
+  "references": [
+    "Zoo"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}
