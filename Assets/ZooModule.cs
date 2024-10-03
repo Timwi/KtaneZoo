@@ -74,14 +74,13 @@ public class ZooModule : MonoBehaviour
         var rnd = RuleSeedable.GetRNG();
         Debug.Log($"[Zoo #{_moduleId}] Using rule seed: {rnd.Seed}");
 
-        var animals = rnd.ShuffleFisherYates(_inGridAnimals);
+        var animals = rnd.ShuffleFisherYates(_inGridAnimals.ToArray());
         var largeHex = Hex.LargeHexagon(5).ToArray();
         _inGrid = Enumerable.Range(0, largeHex.Length).ToDictionary(ix => largeHex[ix], ix => animals[ix]);
         _outGridQ = rnd.ShuffleFisherYates(_outGridQAnimals.ToArray());
         _outGridR = rnd.ShuffleFisherYates(_outGridRAnimals.ToArray());
         var portTypeFromDir = rnd.ShuffleFisherYates(_portTypes.ToArray());
         var mostCommonFirst = rnd.Next(0, 2) == 0;
-        Debug.Log(largeHex.Select(h => $"{h.Q},{h.R}").JoinString(";"));
 
         // ## END RULE SEED
 
