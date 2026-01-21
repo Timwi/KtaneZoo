@@ -367,10 +367,11 @@ public class ZooModule : MonoBehaviour
     {
         ["Filename"] = "ZooSettings.json",
         ["Name"] = "Zoo",
-        ["Listing"] = Ut.NewArray(new Dictionary<string, object>
+        ["Listings"] = Ut.NewArray(new Dictionary<string, object>
         {
-            ["Key"] = "Seconds count",
-            ["Text"] = "The number of seconds for which the door stays open."
+            ["Key"] = "Seconds",
+            ["Text"] = "Seconds",
+            ["Description"] = "How long the door stays open in seconds. Competitive play must have 6 or less."
         }).ToList()
     });
 }
