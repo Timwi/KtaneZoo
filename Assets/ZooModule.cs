@@ -32,7 +32,7 @@ public class ZooModule : MonoBehaviour
     private string[] _selection;    // what’s actually shown on the module once the door opens
     private int[] _selectionPedestalIxs;    // what’s actually shown on the module once the door opens
 
-    enum State { DoorClosed, DoorOpen, DoorClosing, Solved }
+    private enum State { DoorClosed, DoorOpen, DoorClosing, Solved }
     private State _state;
 
     private static int _moduleIdCounter = 1;
@@ -50,7 +50,7 @@ public class ZooModule : MonoBehaviour
     private string[] _outGridQ;
     private string[] _outGridR;
 
-    void Start()
+    private void Start()
     {
         var modConfig = new ModConfig<ZooSettings>("ZooSettings");
         settings = modConfig.ReadSettings();
@@ -117,7 +117,7 @@ public class ZooModule : MonoBehaviour
             }
 
             // Check if the two-step rule works for this hex
-            for (int dir = 0; dir < 6; dir++)
+            for (var dir = 0; dir < 6; dir++)
                 if (Enumerable.Range(0, 5).All(dist => (hex + 2 * dist * Hex.GetDirection(dir)).Distance < 5))
                     return new { PortType = (PortType?) null, Line = Enumerable.Range(0, 5).Select(dist => hex + 2 * dist * Hex.GetDirection(dir)).ToArray() };
 
@@ -129,7 +129,7 @@ public class ZooModule : MonoBehaviour
         Debug.LogFormat("[Zoo #{0}] Line: {1} ({2})", _moduleId, inf.Line.Select(h => _inGrid[h]).JoinString(", "), inf.PortType == null ? "two-steps rule" : inf.PortType.Value.ToString());
 
         _pedestalChildIndexes = new int[_pedestals.Length];
-        for (int i = 0; i < _pedestals.Length; i++)
+        for (var i = 0; i < _pedestals.Length; i++)
         {
             _pedestals[i].gameObject.SetActive(false);
             _pedestalChildIndexes[i] = Array.IndexOf(MainSelectable.Children, _pedestals[i]);
@@ -147,7 +147,10 @@ public class ZooModule : MonoBehaviour
         {
             Door.AddInteractionPunch();
             if (_state == State.DoorClosed)
+            {
+                _state = State.DoorOpen;
                 StartCoroutine(OpenDoor());
+            }
             return false;
         };
     }
@@ -177,7 +180,6 @@ public class ZooModule : MonoBehaviour
         _selection = selection.ToArray();
 
         var subprogress = _solutionLine.IndexOf(selection.Contains);
-        _state = State.DoorOpen;
 
         // Select six of the pedestals to display these on
         foreach (var pedestal in _pedestals)
@@ -186,7 +188,7 @@ public class ZooModule : MonoBehaviour
         _selectionPedestalIxs = Enumerable.Range(0, _pedestals.Length).ToArray().Shuffle().Take(6).ToArray();
         var pedestals = _selectionPedestalIxs.Select(ix => _pedestals[ix]).ToArray();
         var graphics = new List<GameObject>();
-        for (int i = 0; i < 6; i++)
+        for (var i = 0; i < 6; i++)
         {
             graphics.Add(CreateGraphic(selection[i], 0, .2501f, 0, 1.6f, pedestals[i].transform));
             pedestals[i].gameObject.SetActive(true);
@@ -304,7 +306,7 @@ public class ZooModule : MonoBehaviour
 
         var animals = m.Groups[1].Value.Split(',').Select(str => str.Trim().Replace(" ", "")).ToArray();
         var animalInfos = new KeyValuePair<Hex, string>[animals.Length];
-        for (int i = 0; i < animals.Length; i++)
+        for (var i = 0; i < animals.Length; i++)
         {
             animalInfos[i] = _inGrid.FirstOrDefault(kvp => kvp.Value.Trim().Replace(" ", "").Equals(animals[i], StringComparison.InvariantCultureIgnoreCase));
             if (animalInfos[i].Value == null)
@@ -320,7 +322,7 @@ public class ZooModule : MonoBehaviour
         Door.OnInteract();
         yield return new WaitForSeconds(1f);
 
-        for (int i = 0; i < animalInfos.Length; i++)
+        for (var i = 0; i < animalInfos.Length; i++)
         {
             yield return new WaitForSeconds(.1f);
             var ix = Array.IndexOf(_selection, animalInfos[i].Value);
@@ -337,7 +339,7 @@ public class ZooModule : MonoBehaviour
         yield return "strike";
     }
 
-    IEnumerator TwitchHandleForcedSolve()
+    private IEnumerator TwitchHandleForcedSolve()
     {
         while (_state != State.DoorClosed)
             yield return true;
@@ -358,7 +360,7 @@ public class ZooModule : MonoBehaviour
             yield return true;
     }
 
-    sealed class ZooSettings
+    private sealed class ZooSettings
     {
         public int Seconds = 6;
     }
